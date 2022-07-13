@@ -48,8 +48,6 @@ pip install -r requirements.txt
 
 `TELEGRAM_CHAT_ID` ID чата в телеграм, куда будут приходить возникшие ошибки бота
 
-`VK_API_TOKEN` API токен группы Вконтакте. Получить можно в настройках группы во вкладке "Работа с API".
-
 `DATABASE_HOST` Адрес базы данных redis
 
 `DATABASE_PORT` Порт базы данных redis
