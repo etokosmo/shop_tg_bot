@@ -59,6 +59,14 @@ def echo(bot, update):
 
 def handle_menu(bot, update):
     query = update.callback_query
+    if query.data == 'cart':
+        products, total_price = get_cart_items(update.effective_user.id)
+        message = create_cart_message(products, total_price)
+        reply_markup = create_card_buttons(products)
+        bot.send_message(text=message,
+                         reply_markup=reply_markup,
+                         chat_id=query.message.chat_id)
+        return "HANDLE_CART"
     product = get_product_by_id(query.data)
 
     keyboard = [
@@ -130,12 +138,15 @@ def handle_description(bot, update):
         return "HANDLE_CART"
 
     if answer[0] == '1':
+        update.callback_query.answer("Товар добавлен в корзину")
         add_product_in_cart(answer[1], 1, update.effective_user.id)
         return "HANDLE_DESCRIPTION"
     if answer[0] == '3':
+        update.callback_query.answer("Товар добавлен в корзину")
         add_product_in_cart(answer[1], 3, update.effective_user.id)
         return "HANDLE_DESCRIPTION"
     if answer[0] == '5':
+        update.callback_query.answer("Товар добавлен в корзину")
         add_product_in_cart(answer[1], 5, update.effective_user.id)
         return "HANDLE_DESCRIPTION"
     return "HANDLE_MENU"
