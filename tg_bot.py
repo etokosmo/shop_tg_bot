@@ -48,15 +48,6 @@ def start(bot, update):
     return "HANDLE_MENU"
 
 
-def echo(bot, update):
-    query = update.callback_query
-
-    bot.edit_message_text(text="Selected option: {}".format(query.data),
-                          chat_id=query.message.chat_id,
-                          message_id=query.message.message_id)
-    return "ECHO"
-
-
 def handle_menu(bot, update):
     query = update.callback_query
     if query.data == 'cart':
@@ -183,7 +174,6 @@ def handle_users_reply(bot, update):
         'HANDLE_DESCRIPTION': handle_description,
         'HANDLE_CART': handle_cart,
         'HANDLE_WAITING_EMAIL': handle_waiting_email,
-        'ECHO': echo
     }
     state_handler = states_functions[user_state]
     try:
