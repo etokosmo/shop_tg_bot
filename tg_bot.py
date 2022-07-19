@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_menu_buttons():
-    products = get_all_products()
+    products = get_all_products(motlin_client_id, motlin_client_secret)
     keyboard = [
         [InlineKeyboardButton(product.name, callback_data=product.id)]
         for product in products]
@@ -51,14 +51,17 @@ def start(bot, update):
 def handle_menu(bot, update):
     query = update.callback_query
     if query.data == 'cart':
-        products, total_price = get_cart_items(update.effective_user.id)
+        products, total_price = get_cart_items(update.effective_user.id,
+                                               motlin_client_id,
+                                               motlin_client_secret)
         message = create_cart_message(products, total_price)
         reply_markup = create_card_buttons(products)
         bot.send_message(text=message,
                          reply_markup=reply_markup,
                          chat_id=query.message.chat_id)
         return "HANDLE_CART"
-    product = get_product_by_id(query.data)
+    product = get_product_by_id(query.data, motlin_client_id,
+                                motlin_client_secret)
 
     keyboard = [
         [InlineKeyboardButton("1шт.", callback_data=f"1,{product.get('id')}"),
@@ -71,7 +74,8 @@ def handle_menu(bot, update):
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_photo(
         chat_id=query.message.chat_id,
-        photo=get_product_image_by_id(product.get('id')),
+        photo=get_product_image_by_id(product.get('id'), motlin_client_id,
+                                      motlin_client_secret),
         caption=create_product_description(product),
         reply_markup=reply_markup
     )
@@ -96,8 +100,11 @@ def handle_cart(bot, update):
                          chat_id=query.message.chat_id)
         return "HANDLE_WAITING_EMAIL"
     else:
-        remove_product_from_cart(query.data, update.effective_user.id)
-        products, total_price = get_cart_items(update.effective_user.id)
+        remove_product_from_cart(query.data, update.effective_user.id,
+                                 motlin_client_id, motlin_client_secret)
+        products, total_price = get_cart_items(update.effective_user.id,
+                                               motlin_client_id,
+                                               motlin_client_secret)
         message = create_cart_message(products, total_price)
         reply_markup = create_card_buttons(products)
         bot.send_message(text=message,
@@ -125,7 +132,9 @@ def handle_description(bot, update):
         return "HANDLE_MENU"
 
     if command == 'cart':
-        products, total_price = get_cart_items(update.effective_user.id)
+        products, total_price = get_cart_items(update.effective_user.id,
+                                               motlin_client_id,
+                                               motlin_client_secret)
         message = create_cart_message(products, total_price)
         reply_markup = create_card_buttons(products)
         bot.send_message(text=message,
@@ -135,15 +144,18 @@ def handle_description(bot, update):
 
     if command == '1':
         update.callback_query.answer("Товар добавлен в корзину")
-        add_product_in_cart(product_id, 1, update.effective_user.id)
+        add_product_in_cart(product_id, 1, update.effective_user.id,
+                            motlin_client_id, motlin_client_secret)
         return "HANDLE_DESCRIPTION"
     if command == '3':
         update.callback_query.answer("Товар добавлен в корзину")
-        add_product_in_cart(product_id, 3, update.effective_user.id)
+        add_product_in_cart(product_id, 3, update.effective_user.id,
+                            motlin_client_id, motlin_client_secret)
         return "HANDLE_DESCRIPTION"
     if command == '5':
         update.callback_query.answer("Товар добавлен в корзину")
-        add_product_in_cart(product_id, 5, update.effective_user.id)
+        add_product_in_cart(product_id, 5, update.effective_user.id,
+                            motlin_client_id, motlin_client_secret)
         return "HANDLE_DESCRIPTION"
     return "HANDLE_MENU"
 
@@ -152,7 +164,7 @@ def handle_waiting_email(bot, update):
     user = update.effective_user
     name = f"{user.first_name}_tgid-{user.id}"
     email = update.message.text
-    create_customer(name, email)
+    create_customer(name, email, motlin_client_id, motlin_client_secret)
     bot.send_message(
         text=f'Вы прислали мне эту почту: {email}',
         chat_id=update.message.chat_id)
@@ -190,7 +202,8 @@ def handle_users_reply(bot, update):
 
 def get_database_connection():
     """
-    Возвращает конекшн с базой данных Redis, либо создаёт новый, если он ещё не создан.
+    Возвращает конекшн с базой данных Redis,
+    либо создаёт новый, если он ещё не создан.
     """
     global _database
     if _database is None:
@@ -217,6 +230,8 @@ if __name__ == '__main__':
     database_password = os.getenv("DATABASE_PASSWORD")
     database_host = os.getenv("DATABASE_HOST")
     database_port = os.getenv("DATABASE_PORT")
+    motlin_client_id = env("MOTLIN_CLIENT_ID")
+    motlin_client_secret = env("MOTLIN_CLIENT_SECRET")
 
     params = {
         'token': telegram_api_token,
