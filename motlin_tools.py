@@ -45,6 +45,7 @@ def make_authorization() -> (str, int):
 
     response = requests.post('https://api.moltin.com/oauth/access_token',
                              data=data)
+    response.raise_for_status()
     authorization = response.json()
     return authorization.get("access_token"), authorization.get("expires")
 
@@ -58,7 +59,7 @@ def get_all_products() -> [Product]:
 
     response = requests.get('https://api.moltin.com/v2/products',
                             headers=headers)
-
+    response.raise_for_status()
     store = response.json().get("data")
     return [Product(product.get("id"),
                     product.get("name")) for product in store]
@@ -73,6 +74,7 @@ def get_product_by_id(product_id: str) -> dict:
 
     response = requests.get(f'https://api.moltin.com/v2/products/{product_id}',
                             headers=headers)
+    response.raise_for_status()
     return response.json().get("data")
 
 
@@ -89,6 +91,7 @@ def get_product_image_by_id(product_id: str) -> str:
     response = requests.get(
         f'https://api.moltin.com/v2/files/{product_file_id}',
         headers=headers)
+    response.raise_for_status()
     return response.json().get("data").get("link").get("href")
 
 
@@ -108,10 +111,11 @@ def add_product_in_cart(product_id: str, amount: int,
         },
     }
 
-    requests.post(
+    response = requests.post(
         f'https://api.moltin.com/v2/carts/{customer_id}/items',
         headers=headers,
         json=json_data)
+    response.raise_for_status()
 
 
 def get_cart_items(customer_id) -> ([Product], str):
@@ -124,6 +128,7 @@ def get_cart_items(customer_id) -> ([Product], str):
     response = requests.get(
         f'https://api.moltin.com/v2/carts/{customer_id}/items',
         headers=headers)
+    response.raise_for_status()
     cart = response.json()
     products = [Product(product.get("id"),
                         product.get("name"),
@@ -144,9 +149,10 @@ def remove_product_from_cart(product_id: str, customer_id: int) -> None:
         'Authorization': f'Bearer {motlin_access_token}',
     }
 
-    requests.delete(
+    response = requests.delete(
         f'https://api.moltin.com/v2/carts/{customer_id}/items/{product_id}',
         headers=headers)
+    response.raise_for_status()
 
 
 def create_customer(name: str, email: str) -> None:
@@ -163,8 +169,9 @@ def create_customer(name: str, email: str) -> None:
             'email': f'{email}',
         },
     }
-    requests.post('https://api.moltin.com/v2/customers',
-                  headers=headers, json=json_data)
+    response = requests.post('https://api.moltin.com/v2/customers',
+                             headers=headers, json=json_data)
+    response.raise_for_status()
 
 
 def get_customer_by_id(customer_id: str) -> dict:
@@ -177,4 +184,5 @@ def get_customer_by_id(customer_id: str) -> dict:
     response = requests.get(
         f'https://api.moltin.com/v2/customers/{customer_id}',
         headers=headers)
+    response.raise_for_status()
     return response.json()
