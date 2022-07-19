@@ -26,9 +26,7 @@ def is_valid_token(token_expires_timestamp: int) -> bool:
 def get_motlin_access_token() -> str:
     """Return motlin access token"""
     global motlin_token, token_expires_timestamp
-    if motlin_token is None:
-        motlin_token, token_expires_timestamp = make_authorization()
-    elif not is_valid_token(token_expires_timestamp):
+    if (motlin_token is None) or (not is_valid_token(token_expires_timestamp)):
         motlin_token, token_expires_timestamp = make_authorization()
     return motlin_token
 
