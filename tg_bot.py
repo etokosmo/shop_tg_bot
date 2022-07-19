@@ -199,7 +199,7 @@ def get_database_connection():
     return _database
 
 
-def error(bot, update, error):
+def handle_error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning(f'Update {update} caused error {error}', update, error)
 
@@ -230,5 +230,5 @@ if __name__ == '__main__':
     dispatcher.add_handler(CallbackQueryHandler(handle_users_reply))
     dispatcher.add_handler(MessageHandler(Filters.text, handle_users_reply))
     dispatcher.add_handler(CommandHandler('start', handle_users_reply))
-    dispatcher.add_error_handler(error)
+    dispatcher.add_error_handler(handle_error)
     updater.start_polling()
