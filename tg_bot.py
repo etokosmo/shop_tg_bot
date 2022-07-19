@@ -108,8 +108,13 @@ def handle_cart(bot, update):
 
 def handle_description(bot, update):
     query = update.callback_query
-    answer = query.data.split(",")
-    if answer[0] == 'back':
+    try:
+        command, product_id = query.data.split(",")
+    except ValueError:
+        command = query.data
+        product_id = None
+
+    if command == 'back':
         reply_markup = create_menu_buttons()
 
         bot.send_message(text='Please choose:',
@@ -119,7 +124,7 @@ def handle_description(bot, update):
                            message_id=query.message.message_id)
         return "HANDLE_MENU"
 
-    if answer[0] == 'cart':
+    if command == 'cart':
         products, total_price = get_cart_items(update.effective_user.id)
         message = create_cart_message(products, total_price)
         reply_markup = create_card_buttons(products)
@@ -128,17 +133,17 @@ def handle_description(bot, update):
                          chat_id=query.message.chat_id)
         return "HANDLE_CART"
 
-    if answer[0] == '1':
+    if command == '1':
         update.callback_query.answer("Товар добавлен в корзину")
-        add_product_in_cart(answer[1], 1, update.effective_user.id)
+        add_product_in_cart(product_id, 1, update.effective_user.id)
         return "HANDLE_DESCRIPTION"
-    if answer[0] == '3':
+    if command == '3':
         update.callback_query.answer("Товар добавлен в корзину")
-        add_product_in_cart(answer[1], 3, update.effective_user.id)
+        add_product_in_cart(product_id, 3, update.effective_user.id)
         return "HANDLE_DESCRIPTION"
-    if answer[0] == '5':
+    if command == '5':
         update.callback_query.answer("Товар добавлен в корзину")
-        add_product_in_cart(answer[1], 5, update.effective_user.id)
+        add_product_in_cart(product_id, 5, update.effective_user.id)
         return "HANDLE_DESCRIPTION"
     return "HANDLE_MENU"
 
